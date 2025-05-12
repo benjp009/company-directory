@@ -1,29 +1,62 @@
-# Create T3 App
+# 🇫🇷 French SaaS Directory
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+## 🚀 Overview
+Welcome to the **French SaaS Directory** project – an initiative to build the **first comprehensive directory of French SaaS companies**, entirely dedicated to promoting **projects made in France**.
 
-## What's next? How do I make an app with this?
+Our goal is to help users **discover and explore French SaaS solutions** through intuitive filters like:
+- 🧾 **Industry categories** (e.g., Finance, Sales, Marketing, Content, Logistics, etc.)
+- 🔍 **Keyword search**
+- 🗂️ **Company profiles** with detailed information
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+We aim to support the visibility of French SaaS entrepreneurs and offer a platform where businesses and users can connect with the best digital tools made locally.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+---
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+## 🛠️ Tech Stack
+This project is built using a modern and robust stack:
+- **Next.js** (App Router)
+- **TypeScript**
+- **Tailwind CSS**
+- **Prisma** (ORM)
+- **NextAuth.js** (Authentication)
 
-## Learn More
+---
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+## 📦 Features (Planned)
+- ✅ Browse SaaS companies by category and keyword
+- ✅ View detailed company profiles (with contact and service info)
+- ✅ Admin panel for curation and management
+- ✅ User authentication (via NextAuth)
+- ✅ Submission system for new SaaS entries
+- ✅ Public API (future scope)
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+---
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+## 📄 Roadmap
+1. Set up database schema (Prisma)
+2. Implement company directory UI
+3. Add category and keyword filters
+4. Integrate authentication and admin backend
+5. Launch MVP with initial dataset
+6. Community and SaaS submission portal
 
-## How do I deploy this?
+---
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+## 🤝 Contributing
+Want to help promote French SaaS talent? We're open to contributions and suggestions.
+
+---
+
+## 📫 Contact
+If you are a SaaS founder in France or want to contribute:
+- Reach out via GitHub Issues or submit a PR
+- Email: [Your Email Here]
+
+---
+
+## 📢 License
+MIT – open to all who want to promote innovation and entrepreneurship in France.
+
+---
+
+*Made with 🇫🇷 pride.*
