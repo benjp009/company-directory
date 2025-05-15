@@ -1,12 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access*/
-// ===============================================
-// src/server/api/routers/company.ts
-// ===============================================
 import { z } from "zod";
-import { t } from "../trpc";
+import { router, procedure } from "../trpc";
 import { prisma } from "@/server/db";
 
-// Zod output schemas for validation
 const CategorySchema = z.object({ id: z.string(), name: z.string() });
 const KeywordSchema = z.object({ id: z.string(), name: z.string() });
 const CompanyBaseSchema = z.object({
@@ -28,28 +24,19 @@ const CompanySchema = CompanyBaseSchema.extend({
 
 export type Company = z.infer<typeof CompanySchema>;
 
-// Router definition with CRUD operations
-export const companyRouter = t.router({
-  // List all companies
-  list: t.procedure
+export const companyRouter = router({
+  list: procedure
     .output(z.array(CompanySchema))
-    .query(async () => {
-      return prisma.company.findMany({ include: { categories: true, keywords: true } });
-    }),
+    .query(() => prisma.company.findMany({ include: { categories: true, keywords: true } })),
 
-  // Get a single company by ID
-  getById: t.procedure
+  getById: procedure
     .input(z.object({ id: z.string().cuid() }))
     .output(CompanySchema.nullable())
-    .query(async ({ input }) => {
-      return prisma.company.findUnique({
-        where: { id: input.id },
-        include: { categories: true, keywords: true },
-      });
-    }),
+    .query(({ input }) =>
+      prisma.company.findUnique({ where: { id: input.id }, include: { categories: true, keywords: true } })
+    ),
 
-  // Create a new company
-  create: t.procedure
+  create: procedure
     .input(
       z.object({
         name: z.string(),
@@ -64,20 +51,15 @@ export const companyRouter = t.router({
       })
     )
     .output(CompanySchema)
-    .mutation(async ({ input }) => {
+    .mutation(({ input }) => {
       const { categoryIds, keywordIds, ...data } = input;
-      return prisma.company.create({
-        data: {
-          ...data,
-          categories: categoryIds ? { connect: categoryIds.map(id => ({ id })) } : undefined,
-          keywords: keywordIds ? { connect: keywordIds.map(id => ({ id })) } : undefined,
-        },
-        include: { categories: true, keywords: true },
-      });
+      return prisma.company.create({ data: { ...data,
+        categories: categoryIds ? { connect: categoryIds.map(id => ({ id })) } : undefined,
+        keywords: keywordIds ? { connect: keywordIds.map(id => ({ id })) } : undefined,
+      }, include: { categories: true, keywords: true } });
     }),
 
-  // Update an existing company
-  update: t.procedure
+  update: procedure
     .input(
       z.object({
         id: z.string().cuid(),
@@ -95,26 +77,19 @@ export const companyRouter = t.router({
       })
     )
     .output(CompanySchema)
-    .mutation(async ({ input }) => {
+    .mutation(({ input }) => {
       const { id, data } = input;
       const { categoryIds, keywordIds, ...rest } = data;
-      return prisma.company.update({
-        where: { id },
-        data: {
-          ...rest,
-          categories: categoryIds ? { set: categoryIds.map(id => ({ id })) } : undefined,
-          keywords: keywordIds ? { set: keywordIds.map(id => ({ id })) } : undefined,
-        },
-        include: { categories: true, keywords: true },
-      });
+      return prisma.company.update({ where: { id }, data: { ...rest,
+        categories: categoryIds ? { set: categoryIds.map(id => ({ id })) } : undefined,
+        keywords: keywordIds ? { set: keywordIds.map(id => ({ id })) } : undefined,
+      }, include: { categories: true, keywords: true } });
     }),
 
-  // Delete a company by ID
-  delete: t.procedure
+  delete: procedure
     .input(z.object({ id: z.string().cuid() }))
     .output(z.object({ success: z.boolean() }))
-    .mutation(async ({ input }) => {
-      await prisma.company.delete({ where: { id: input.id } });
-      return { success: true };
-    }),
+    .mutation(({ input }) =>
+      prisma.company.delete({ where: { id: input.id } }).then(() => ({ success: true }))
+    ),
 });
