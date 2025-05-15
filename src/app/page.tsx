@@ -1,69 +1,117 @@
-import Link from "next/link";
+/* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/prefer-optional-chain, @typescript-eslint/prefer-optional-chain */
 
-import { LatestPost } from "@/app/_components/post";
-import { auth } from "@/server/auth";
-import { api, HydrateClient } from "@/trpc/server";
 
-export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
-  const session = await auth();
+'use client';
 
-  if (session?.user) {
-    void api.post.getLatest.prefetch();
-  }
+import Link from 'next/link';
+import { useState, useMemo } from 'react';
+import { trpc } from '@/utils/trpc';
+import { signIn, signOut, useSession } from 'next-auth/react';
+
+export default function HomePage() {
+  const { data: session } = useSession();
+  const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Fetch all companies
+  const { data: companies = [], isLoading } = trpc.company.list.useQuery();
+
+  // Derive unique categories from companies
+  const categories = useMemo(() => {
+    const map = new Map<string, { id: string; name: string }>();
+    companies.forEach(c => {
+      c.categories.forEach(cat => map.set(cat.id, cat));
+    });
+    return Array.from(map.values());
+  }, [companies]);
+
+  // Filter companies by search and category
+  const filtered = useMemo(() => {
+    return companies.filter(c => {
+      const matchName = c.name.toLowerCase().includes(search.toLowerCase());
+      const matchCat = selectedCategory
+        ? c.categories.some(cat => cat.id === selectedCategory)
+        : true;
+      return matchName && matchCat;
+    });
+  }, [companies, search, selectedCategory]);
 
   return (
-    <HydrateClient>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight sm:text-[5rem]">
-            Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-          </h1>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/usage/first-steps"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">First Steps →</h3>
-              <div className="text-lg">
-                Just the basics - Everything you need to know to set up your
-                database and authentication.
-              </div>
-            </Link>
-            <Link
-              className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-              href="https://create.t3.gg/en/introduction"
-              target="_blank"
-            >
-              <h3 className="text-2xl font-bold">Documentation →</h3>
-              <div className="text-lg">
-                Learn more about Create T3 App, the libraries it uses, and how
-                to deploy it.
-              </div>
-            </Link>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
-              {hello ? hello.greeting : "Loading tRPC query..."}
-            </p>
-
-            <div className="flex flex-col items-center justify-center gap-4">
-              <p className="text-center text-2xl text-white">
-                {session && <span>Logged in as {session.user?.name}</span>}
-              </p>
-              <Link
-                href={session ? "/api/auth/signout" : "/api/auth/signin"}
-                className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
-              >
-                {session ? "Sign out" : "Sign in"}
-              </Link>
-            </div>
-          </div>
-
-          {session?.user && <LatestPost />}
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow">
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold">French SaaS Directory</h1>
+          <nav className="space-x-4">
+            {session ? (
+              <>
+                <span>{session.user?.name}</span>
+                <button onClick={() => signOut()} className="text-blue-600">Sign out</button>
+              </>
+            ) : (
+              <button onClick={() => signIn()} className="text-blue-600">Sign in</button>
+            )}
+          </nav>
         </div>
+      </header>
+
+      {/* Main */}
+      <main className="container mx-auto px-6 py-10">
+        {/* Search */}
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Search companies..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full border rounded p-2"
+          />
+        </div>
+
+        {/* Categories */}
+        <div className="mb-6">
+          <h2 className="text-xl mb-2">Categories</h2>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={`px-3 py-1 border rounded ${!selectedCategory ? 'bg-blue-500 text-white' : ''}`}
+            >
+              All
+            </button>
+            {categories.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`px-3 py-1 border rounded ${selectedCategory === cat.id ? 'bg-blue-500 text-white' : ''}`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Company Grid */}
+        {isLoading ? (
+          <p>Loading companies...</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {filtered.length > 0 ? (
+              filtered.map(company => (
+                <Link
+                  key={company.id}
+                  href={`/companies/${company.id}`}
+                  className="block bg-white p-4 rounded shadow hover:shadow-lg"
+                >
+                  <h3 className="text-lg font-semibold">{company.name}</h3>
+                  <p className="text-sm text-gray-600">{company.description}</p>
+                </Link>
+              ))
+            ) : (
+              <p>No companies found.</p>
+            )}
+          </div>
+        )}
       </main>
-    </HydrateClient>
+    </div>
   );
 }
