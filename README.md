@@ -60,3 +60,9 @@ MIT – open to all who want to promote innovation and entrepreneurship in Franc
 ---
 
 *Made with 🇫🇷 pride.*
+
+
+## 📢 License
+Development Cheatcode : 
+npx prisma generate
+npm run dev
